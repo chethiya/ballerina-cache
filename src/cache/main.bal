@@ -25,8 +25,8 @@ import ballerina/time;
 import ballerina/math;
 import ballerina/runtime;
 
-public function simpleTest() {
-  LRUCache cache = new(3, 400);
+public function simpleTest(int expiryTime) {
+  LRUCache cache = new(3, expiryTime);
   cache.put("a", 1);
   runtime:sleep(200);
   cache.put("b", 2);
@@ -161,7 +161,8 @@ public function evaluate(int cacheSize) {
 }
 
 public function main() {
-  simpleTest();
+  simpleTest(400);
+  simpleTest(0);
 
   evaluate(5);
   evaluate(10);
