@@ -39,7 +39,7 @@ public type LRUCache object {
   CacheItem? tail = ();
   int size = 0;
 
-  public function __init(int capcatiy = 100, int expiryTime = 60000) {
+  public function __init(int capcatiy = 100, int expiryTime = 0) {
     self.capacity = capcatiy;
     self.expiryTime = expiryTime;
   }
@@ -94,6 +94,9 @@ public type LRUCache object {
   }
 
   private function expireLRUItems() {
+    if (self.expiryTime == 0) {
+      return;
+    }
     int expireTime = time:currentTime().time - self.expiryTime;
     // Compiler needs to improve
 
@@ -120,7 +123,10 @@ public type LRUCache object {
         return false;
       }
       CacheItem item = self.cache.get(key);
-      if (item.lastAccessTime < time:currentTime().time - self.expiryTime) {
+      if (
+        self.expiryTime > 0 &&
+        item.lastAccessTime < time:currentTime().time - self.expiryTime
+      ) {
         // Remove item from the  cache
         self.removeFromLinkedList(item);
         _ = self.cache.remove(key);
@@ -140,8 +146,10 @@ public type LRUCache object {
       // removed from the linked list to add it back to front or expire it later
       self.removeFromLinkedList(item);
 
-      int expireTime = time:currentTime().time - self.expiryTime;
-      if (item.lastAccessTime < expireTime) { // item is expired
+      if (
+        self.expiryTime > 0 &&
+        item.lastAccessTime < time:currentTime().time - self.expiryTime
+      ) { // item is expired
         // Get rid of current item from the cache
         _ = self.cache.remove(key);
         self.size -= 1;
