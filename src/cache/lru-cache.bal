@@ -32,16 +32,16 @@ type CacheItem record {
 
 public type LRUCache object {
   private int capacity;
-  private int expiryTime;
+  private int expiryTime; // in nanoseconds, assuming program won't run for 100 years!
 
   private map<CacheItem> cache = {};
   CacheItem? head = ();
   CacheItem? tail = ();
   int size = 0;
 
-  public function __init(int capcatiy = 100, int expiryTime = 0) {
+  public function __init(int capcatiy = 100, int expiryTimeInMillis = 0) {
     self.capacity = capcatiy;
-    self.expiryTime = expiryTime;
+    self.expiryTime = expiryTimeInMillis * 1000000;
   }
 
   // Linked list operations
@@ -79,7 +79,7 @@ public type LRUCache object {
 
       self.head = item;
     }
-    item.lastAccessTime = time:currentTime().time;
+    item.lastAccessTime = time:nanoTime();
   }
 
   // evicting least recently used item when the capicity is reached
@@ -97,7 +97,7 @@ public type LRUCache object {
     if (self.expiryTime == 0) {
       return;
     }
-    int expireTime = time:currentTime().time - self.expiryTime;
+    int expireTime = time:nanoTime() - self.expiryTime;
     // Compiler needs to improve
 
     // while (!(self.tail is ()) && self.tail.lastAccessTime < expireTime) {
@@ -125,7 +125,7 @@ public type LRUCache object {
       CacheItem item = self.cache.get(key);
       if (
         self.expiryTime > 0 &&
-        item.lastAccessTime < time:currentTime().time - self.expiryTime
+        item.lastAccessTime < time:nanoTime() - self.expiryTime
       ) {
         // Remove item from the  cache
         self.removeFromLinkedList(item);
@@ -148,7 +148,7 @@ public type LRUCache object {
 
       if (
         self.expiryTime > 0 &&
-        item.lastAccessTime < time:currentTime().time - self.expiryTime
+        item.lastAccessTime < time:nanoTime() - self.expiryTime
       ) { // item is expired
         // Get rid of current item from the cache
         _ = self.cache.remove(key);
