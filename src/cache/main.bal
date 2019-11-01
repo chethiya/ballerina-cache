@@ -25,12 +25,13 @@ import ballerina/time;
 import ballerina/math;
 import ballerina/runtime;
 
-public function simpleTest(int expiryTime) {
+public function simpleTest(int expiryTime, boolean updateLastAccesssTimeOnGet) {
   LRUCache cache = new(3, expiryTime);
   cache.put("a", 1);
   runtime:sleep(200);
   cache.put("b", 2);
   cache.put("c", 3);
+  _ = cache.get("a");
   runtime:sleep(300);
 
   io:println("a ", cache.hasKey("a"));
@@ -100,18 +101,21 @@ public function evaluate(int cacheSize) {
     rangeEndValue = 1;
   }
 
-  worker w1 {
-    simulateGet(cache, cacheSize);
+  fork {
+    worker w1 {
+      simulateGet(cache, cacheSize);
+    }
+    worker w2 {
+      simulateGet(cache, cacheSize);
+    }
+    worker w3 {
+      simulateGet(cache, cacheSize);
+    }
+    worker w4 {
+      simulateGet(cache, cacheSize);
+    }
   }
-  worker w2 {
-    simulateGet(cache, cacheSize);
-  }
-  worker w3 {
-    simulateGet(cache, cacheSize);
-  }
-  worker w4 {
-    simulateGet(cache, cacheSize);
-  }
+
   while (i < putQ) {
     // runtime:sleep(1);
     string key = i.toString();
@@ -161,8 +165,10 @@ public function evaluate(int cacheSize) {
 }
 
 public function main() {
-  simpleTest(400);
-  simpleTest(0);
+  simpleTest(400, false);
+  simpleTest(400, true);
+  simpleTest(0, false);
+  simpleTest(0, true);
 
   evaluate(5);
   evaluate(10);

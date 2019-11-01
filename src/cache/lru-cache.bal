@@ -33,15 +33,26 @@ type CacheItem record {
 public type LRUCache object {
   private int capacity;
   private int expiryTime; // in nanoseconds, assuming program won't run for 100 years!
+  private boolean updateLastAccessTimeOnGet;
 
   private map<CacheItem> cache = {};
   CacheItem? head = ();
   CacheItem? tail = ();
   int size = 0;
 
-  public function __init(int capcatiy = 100, int expiryTimeInMillis = 0) {
-    self.capacity = capcatiy;
+  # Create an LRU cache
+  #
+  # + capacity - Number of entries allocated for the cache
+  # + expiryTimeInMillis - If time since last access time of an entry is greater than this value then those entries will be discarded from the cache
+  # + updateLastAccessTimeOnGet - Update the last access time of the entries even on get() method. If this is set to false last access time of the entries will only be updated on put() method. This is false by default because in most cases values you set in the cache are expected to be timed out after some time, no matter how frequently you read those cache entries.
+  public function __init(
+    int capacity = 100,
+    int expiryTimeInMillis = 0,
+    boolean updateLastAccessTimeOnGet = false
+  ) {
+    self.capacity = capacity;
     self.expiryTime = expiryTimeInMillis * 1000000;
+    self.updateLastAccessTimeOnGet = updateLastAccessTimeOnGet;
   }
 
   // Linked list operations
@@ -63,7 +74,7 @@ public type LRUCache object {
     item.prev = ();
   }
 
-  private function addToHead(CacheItem item) {
+  private function addToHead(CacheItem item, boolean isGet = false) {
     if (self.head is ()) {
       self.head = item;
       self.tail = item;
@@ -79,7 +90,9 @@ public type LRUCache object {
 
       self.head = item;
     }
-    item.lastAccessTime = time:nanoTime();
+    if (!isGet || self.updateLastAccessTimeOnGet) {
+      item.lastAccessTime = time:nanoTime();
+    }
   }
 
   // evicting least recently used item when the capicity is reached
@@ -156,7 +169,7 @@ public type LRUCache object {
         return ();
       }
 
-      self.addToHead(item);
+      self.addToHead(item, true);
       return item.data;
     }
   }
@@ -214,5 +227,9 @@ public type LRUCache object {
       self.expireLRUItems();
       return self.size;
     }
+  }
+
+  public function capacity() returns int {
+    return self.capacity;
   }
 };
