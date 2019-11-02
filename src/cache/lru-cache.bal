@@ -119,16 +119,32 @@ public type LRUCache object {
       return;
     }
     int expireTime = time:nanoTime() - self.expiryTime;
-    // Compiler needs to improve
 
-    // while (!(self.tail is ()) && self.tail.lastAccessTime < expireTime) {
-    // while (!(self.tail is ()) && (<CacheItem>self.tail).lastAccessTime < expireTime) {
-    while (!(self.tail is ())) {
-      CacheItem t = <CacheItem>self.tail;
-      if (t.lastAccessTime >= expireTime) {
-        return;
+    if (self.updateLastAccessTimeOnGet) {
+      // linked list is also sorted by last access time
+
+      // Compiler needs to improve
+      // while (!(self.tail is ()) && self.tail.lastAccessTime < expireTime) {
+      // while (!(self.tail is ()) && (<CacheItem>self.tail).lastAccessTime < expireTime) {
+      while (!(self.tail is ())) {
+        CacheItem t = <CacheItem>self.tail;
+        if (t.lastAccessTime >= expireTime) {
+          return;
+        }
+        self.evictLRUItem();
       }
-      self.evictLRUItem();
+    } else {
+      CacheItem? cur = self.head;
+      while (!(cur is ())) {
+        CacheItem item = <CacheItem>cur;
+        CacheItem? next = item.next;
+        if (item.lastAccessTime < expireTime) {
+          self.removeFromLinkedList(item);
+          _ = self.cache.remove(item.key);
+          self.size -= 1;
+        }
+        cur = next;
+      }
     }
   }
 
@@ -148,7 +164,7 @@ public type LRUCache object {
         self.expiryTime > 0 &&
         item.lastAccessTime < time:nanoTime() - self.expiryTime
       ) {
-        // Remove item from the  cache
+        // Remove item from the cache
         self.removeFromLinkedList(item);
         _ = self.cache.remove(key);
         self.size -= 1;
@@ -215,6 +231,8 @@ public type LRUCache object {
     }
   }
 
+  # Get a list of active cached keys
+  # + return - Returns a list of active cached keys
   public function keys() returns string[] {
     lock {
       // Need to get rid of expired items before geting the list of keys
@@ -223,6 +241,10 @@ public type LRUCache object {
     }
   }
 
+  # Get the number of active cached keys.
+  # This will have linear time complexity if updateLastAccessTimeOnGet is set
+  # to false. Otherwise it'll run in constant time.
+  # + return - Returns the number of active keys.
   public function size() returns int {
     lock {
       // Need to get rid of expired items before geting the size
