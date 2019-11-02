@@ -22,12 +22,20 @@
 
 import ballerina/time;
 
-type CacheItem record {
+type CacheItem object {
   any data;
   string key;
   int lastAccessTime;
   CacheItem? prev;
   CacheItem? next;
+
+  function __init(any data, string key) {
+    self.data = data;
+    self.key = key;
+    self.lastAccessTime = 0;
+    self.prev = ();
+    self.next = ();
+  }
 };
 
 public type LRUCache object {
@@ -187,13 +195,7 @@ public type LRUCache object {
       if (self.size == self.capacity) {
         self.evictLRUItem();
       }
-      CacheItem item = {
-        data: value,
-        key: key,
-        lastAccessTime: 0,
-        prev: (),
-        next: ()
-      };
+      CacheItem item = new(data = value, key = key);
       self.addToHead(item);
       self.cache[key] = item;
       self.size += 1;
