@@ -1,6 +1,8 @@
 # LRUCache
 
-This is an LRU Cache implementation that can be used as an alternative to [Cache in Stadnard Library](https://ballerina.io/learn/api-docs/ballerina/cache/index.html) which has a sub-optimal time complexity. You can find the issue regarding the sub-optimality [here](https://github.com/ballerina-platform/ballerina-lang/issues/19487).
+This is an LRU Cache implementation.
+
+This can be used as an alternative to [Cache in Stadnard Library](https://ballerina.io/learn/api-docs/ballerina/cache/index.html) which has a sub-optimal time complexity. You can find the issue regarding the sub-optimality [here](https://github.com/ballerina-platform/ballerina-lang/issues/19487).
 
 Also you can find a detailed comparison between two implementaions [here in my blog post](http://chethiya.github.io/ballerina-cache.html).
 
