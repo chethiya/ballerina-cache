@@ -148,12 +148,12 @@ public type LRUCache object {
     }
   }
 
-  # Check whether key is valid cache entry without updating access time
-  # You can use get() method if access time need to be updated.
-  # () will be returned.
+  # Check whether key is a alid cache entry. This doesn't have any impact on
+  # last accessed time.
+  # Use get() method if access time need to be updated.
   #
   # + key - Key of the cache entry
-  # + return - Returns whether there is valid cache entry associated with key
+  # + return - Returns whether there is valid cache entry associated with the key
   public function hasKey(string key) returns boolean {
     lock {
       if (!self.cache.hasKey(key)) {
@@ -174,6 +174,10 @@ public type LRUCache object {
     }
   }
 
+  # Get the cache entry with the given key.
+  #
+  # + key - Key of the cache entry
+  # + return - Returns the value of the cache entry. If no such entry exists for the given key then a () will be returned.
   public function get(string key) returns @untainted any? {
     lock {
       if (!self.cache.hasKey(key)) {
@@ -198,6 +202,10 @@ public type LRUCache object {
     }
   }
 
+  # Set the cache entry with the given key and value.
+  #
+  # + key - Key of the cache entry
+  # + value - Value of the cache entry
   public function put(string key, any value) {
     lock {
       if (self.cache.hasKey(key)) {
@@ -218,6 +226,11 @@ public type LRUCache object {
     }
   }
 
+  # Remove the cache entry with the given key.
+  #
+  # + key - Key of the cache entry to be removed.
+  # + return - Returns the value of the removed cache entry. If no such active
+  # cache entry exists for the given key, then this returns ().
   public function remove(string key) returns any? {
     lock {
       if (!self.cache.hasKey(key)) {
@@ -231,8 +244,8 @@ public type LRUCache object {
     }
   }
 
-  # Get a list of active cached keys
-  # + return - Returns a list of active cached keys
+  # Get a list of active cached keys sorted by used time (both PUT and GET uses).
+  # + return - Returns a list of active cached keys. Most recently used item comes first while least recently used item comes the last in the list.
   public function keys() returns string[] {
     lock {
       // Need to get rid of expired items before geting the list of keys
@@ -259,6 +272,8 @@ public type LRUCache object {
     }
   }
 
+  # Get the capacity of the cache.
+  # + return - Returns the capacity.
   public function capacity() returns int {
     return self.capacity;
   }
