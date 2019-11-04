@@ -20,13 +20,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// Use of this script is deprecated and is moved unit tests.
+
 import ballerina/io;
 import ballerina/time;
 import ballerina/math;
 import ballerina/runtime;
+// import ballerina/cache;
 
-public function simpleTest(int expiryTime, boolean updateLastAccesssTimeOnGet) {
-  LRUCache cache = new(3, expiryTime);
+function simpleTest(int expiryTime, boolean updateLastAccesssTimeOnGet) {
+  LRUCache cache = new(3, expiryTime, updateLastAccesssTimeOnGet);
   cache.put("a", 1);
   runtime:sleep(200);
   cache.put("b", 2);
@@ -88,9 +91,10 @@ function simulateGet(@untainted LRUCache cache, int cacheSize) {
   io:println("Worker time ", curTime - startTime, " and hit rate is ", hitRate, " which started at ", started);
 }
 
-public function evaluate(int cacheSize) {
+function evaluate(int cacheSize) {
   io:println("Testing cache size ", cacheSize);
   LRUCache cache =  new(cacheSize, 3600000);
+  // cache:Cache cache =  new(3600000, cacheSize);
 
   int startTime = time:currentTime().time;
 
@@ -164,7 +168,7 @@ public function evaluate(int cacheSize) {
 
 }
 
-public function main() {
+function deprecatedTest() {
   simpleTest(400, false);
   simpleTest(400, true);
   simpleTest(0, false);
@@ -180,3 +184,7 @@ public function main() {
   evaluate(640);
   evaluate(1000);
 }
+
+// public function main() {
+//   deprecatedTest();
+// }
