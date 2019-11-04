@@ -121,7 +121,7 @@ public type LRUCache object {
     int expireTime = time:nanoTime() - self.expiryTime;
 
     if (self.updateLastAccessTimeOnGet) {
-      // linked list is also sorted by last access time
+      // linked list is sorted by last access time
 
       // Compiler needs to improve
       // while (!(self.tail is ()) && self.tail.lastAccessTime < expireTime) {
@@ -129,7 +129,7 @@ public type LRUCache object {
       while (!(self.tail is ())) {
         CacheItem t = <CacheItem>self.tail;
         if (t.lastAccessTime >= expireTime) {
-          return;
+          break;
         }
         self.evictLRUItem();
       }
@@ -237,7 +237,13 @@ public type LRUCache object {
     lock {
       // Need to get rid of expired items before geting the list of keys
       self.expireLRUItems();
-      return self.cache.keys();
+      string[] arr = [];
+      CacheItem? cur = self.head;
+      while (!(cur is ())) {
+        arr.push(cur.key);
+        cur = cur.next;
+      }
+      return arr;
     }
   }
 

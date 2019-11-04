@@ -40,8 +40,8 @@ function testFunction() {
   io:println("I'm in test function!");
   // io:println(expiryTimeTest(400, false));
   // io:println(expiryTimeTest(400, true));
-  test:assertEquals(expiryTimeTest(400, false), <[string[], int]>[<string[]>["b", "c"], 2]);
-  test:assertEquals(expiryTimeTest(400, true), <[string[], int]>[<string[]>["a", "b", "c"], 3]);
+  test:assertEquals(expiryTimeTest(400, false), <[string[], int]>[<string[]>["c", "b"], 2]);
+  test:assertEquals(expiryTimeTest(400, true), <[string[], int]>[<string[]>["a", "c", "b"], 3]);
 
   test:assertTrue(true, msg = "Failed!");
 }
